@@ -1,7 +1,7 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title>JS设置DES加密处理</title>
+        <title>JS设置AES加密处理</title>
 		<script type="text/javascript" src="js\core.js"></script>
 		<script type="text/javascript" src="js\cipher-core.js"></script>
         <script type="text/javascript" src="js\jquery.min.js"></script>
@@ -12,21 +12,21 @@
 		
 
         <script>
-             //DES 解密 加密
-            function encryptByDES(message, key) {
+             //AES 解密 加密
+            function encryptByAES(message, key) {
                     var keyHex = CryptoJS.enc.Utf8.parse(key);
-                    var encrypted = CryptoJS.DES.encrypt(message, keyHex, {
+                    var encrypted = CryptoJS.AES.encrypt(message, keyHex, {
                         mode: CryptoJS.mode.ECB,
                         padding: CryptoJS.pad.Pkcs7
                     });
 					//数组转换为base64
                     return CryptoJS.enc.Base64.stringify(encrypted.ciphertext);//encrypted.toString();
                 }
-                //DES 解密
-            function decryptByDES(ciphertext, key) {
+                //AES 解密
+            function decryptByAES(ciphertext, key) {
                 var keyHex = CryptoJS.enc.Utf8.parse(key);
                 // direct decrypt ciphertext
-                var decrypted = CryptoJS.DES.decrypt({
+                var decrypted = CryptoJS.AES.decrypt({
 					//base64转换为数组
                     ciphertext: CryptoJS.enc.Base64.parse(ciphertext)
                 }, keyHex, {
@@ -41,18 +41,18 @@
             function encryptStr() {
                     var strKey = $.trim($('#key').val());
                     var strMsg = $.trim($('#text1').val());
-                    $('#text2').val(encryptByDES(strMsg, strKey));
+                    $('#text2').val(encryptByAES(strMsg, strKey));
                 }
                 //解密
             function decryptStr() {
                 var strKey = $.trim($('#key').val());
                 var ciphertext = $.trim($('#text2').val());
-                $('#text3').val(decryptByDES(ciphertext, strKey));
+                $('#text3').val(decryptByAES(ciphertext, strKey));
             }
         </script>
     </head>
     <body>
-        <h1>JS设置DES加密处理</h1>
+        <h1>JS设置AES加密处理</h1>
         <label>key</label>
         <input type="text" value='12345678' id="key" />
 		<hr>
