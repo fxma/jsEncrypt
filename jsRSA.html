@@ -1,0 +1,267 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sample Application for RSA signing in JavaScript</title>
+    <script language="JavaScript" type="text/javascript" src="js/jsrsasign-all-min.js"></script>
+    <script language="JavaScript" type="text/javascript">
+        function doSign() {
+            // 公钥
+            let pk = "-----BEGIN PUBLIC KEY-----\n" +
+                "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3XSdz1MnzazBEN5KOfTx0IyVJ\n" +
+                "Z5wb57isrCuHDhnYXwtmdhQalgII0fozeeFpMpAvlnmHC1kpW7XVGvZnLx3bWbCE\n" +
+                "bf+pMSW4kmQuI+5cxRUJbCl7sdaODBrINgERHPICVC18AJLThEVMHyjuR6Jn4zQm\n" +
+                "yYNbReSktY/BrFTvMQIDAQAB\n" +
+                "-----END PUBLIC KEY-----";
+            // 私钥
+            let priK = "-----BEGIN PRIVATE KEY-----\n" +
+                "MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAPddJ3PUyfNrMEQ3\n" +
+                "ko59PHQjJUlnnBvnuKysK4cOGdhfC2Z2FBqWAgjR+jN54WkykC+WeYcLWSlbtdUa\n" +
+                "9mcvHdtZsIRt/6kxJbiSZC4j7lzFFQlsKXux1o4MGsg2AREc8gJULXwAktOERUwf\n" +
+                "KO5HomfjNCbJg1tF5KS1j8GsVO8xAgMBAAECgYEA6eG1JMrj63jEmStmMb1txG1a\n" +
+                "mu4Q5z2QGgtr2HVXsIIlGEq6tWxyHf7TL4qkuz9onuYKn8n2Eqm44fZtVaBx+5ES\n" +
+                "zRpIvlTvaxmVu0HZ1hYAzUw1XyRnXNMKpL5tT4GCjm8+QGPzlGxgXI1sNg8r9Jaw\n" +
+                "9zRUYeA6LQR9RIMkHWUCQQD8QojjVoGjtiunoh/N8iplhUszZIavAEvmDIE+kVy+\n" +
+                "pA7hvlukLw6JMc7cfTcnHyxDo9iHVIzrWlTuKRq9KWVLAkEA+wgJS2sgtldnCVn6\n" +
+                "tJKFVwsHrWhMIU29msPPbNuWUD23BcKE/vehIyFu1ahNA/TiM40PEnzprQ5JfPxU\n" +
+                "16S78wJANTfMLTnYy7Lo7sqTLx2BuD0wqjzw9QZ4/KVytsJv8IAn65P/PVn4FRV+\n" +
+                "8KEx+3zmF7b/PT2nJRe/hycAzxtmlQJBAMrFwQxEqpXfoAEzx4lY2ZBn/nmaR/SW\n" +
+                "4VNEXCbocVC7qT1j1R5HVMgV13uKiTtq8dUGWmhqsi7x3XayNK5ECPUCQQDZaAN6\n" +
+                "tvIHApz9OLsXSw0jZirQ6KEYdharXbIVDy1W1sVE3lzLbqLdFp1bxAHQIvsYS5PM\n" +
+                "A9veSJh372RLJKkj\n" +
+                "-----END PRIVATE KEY-----";
+
+            priK = document.form1.prvkey1.value;
+            pk = document.form1.cert.value;
+
+            var src = document.form1.msgsigned.value;
+            // 使用密钥签名
+            var rsa = new RSAKey();  //创建rsa实例
+            //因为后端提供的是pck#8的密钥对，所以这里使用 KEYUTIL.getKey来解析密钥
+            // yourPEMKey替换为后端提供的密钥
+            rsa = KEYUTIL.getKey(priK);
+            // 设定签名以 SHA256 为基准，其他还有sha1等，详见文档
+            var sig = new KJUR.crypto.Signature({"alg": "SHA256withRSA"});
+            // 初始化
+            sig.init(rsa)
+            // 传入带加密字符串
+            sig.updateString(src)
+            // 生成签名
+            var sign = hextob64(sig.sign());
+            console.log("签名: " + sign);
+            document.form1.siggenerated.value = linebrk(sign, 64);
+
+            var rsa = new RSAKey();
+			//密钥对格式为PCK#8时使用KEYUTIL.getKey(yourPEMKey)进行解析，而PCK#1则使用rsa.readPrivateKeyFromPEMString
+            rsa = KEYUTIL.getKey(priK);
+            var hashAlg = document.form1.hashalg.value;
+            var hSig = rsa.sign(document.form1.msgsigned.value, hashAlg);
+            document.form1.siggenerated.value = linebrk(hextob64(hSig), 64);
+        }
+
+        function doVerify() {
+            var sMsg = document.form1.msgverified.value;
+            var hSig = document.form1.sigverified.value;
+
+            var pubKey = KEYUTIL.getKey(document.form1.cert.value);
+            var isValid = pubKey.verify(sMsg, b64tohex(hSig));
+
+            // display verification result
+            if (isValid) {
+                _displayStatus("valid");
+            } else {
+                _displayStatus("invalid");
+            }
+        }
+
+        function copyMsgAndSig() {
+            _displayStatus("reset");
+            document.form1.msgverified.value = document.form1.msgsigned.value;
+            document.form1.sigverified.value = document.form1.siggenerated.value;
+        }
+
+        function _displayStatus(sStatus) {
+            var div1 = document.getElementById("verifyresult");
+            if (sStatus == "valid") {
+                div1.style.backgroundColor = "skyblue";
+                div1.innerHTML = "This signature is *VALID*.";
+            } else if (sStatus == "invalid") {
+                div1.style.backgroundColor = "deeppink";
+                div1.innerHTML = "This signature is *NOT VALID*.";
+            } else {
+                div1.style.backgroundColor = "yellow";
+                div1.innerHTML = "Please fill values below and push [Verify this sigunature] button.";
+            }
+        }
+
+        function doEncrypt() {
+            // 原文
+            var src = document.form1.msgsigned.value;
+            var pk = document.form1.cert.value;
+            // 加密
+            // 读取解析pem格式的秘钥, 生成秘钥实例 (RSAKey)
+            var pub = KEYUTIL.getKey(pk);
+            var enc = KJUR.crypto.Cipher.encrypt(src, pub);
+            console.log("jsrsasign encrypt:" + enc);
+            //Base64编码
+            console.log(hextob64(enc));
+            document.form1.encrypted.value = hextob64(enc);
+        }
+
+        function doDecrypt() {
+            // 解密
+            var priK = document.form1.prvkey1.value;
+            var prv = KEYUTIL.getKey(priK);
+            var enc = document.form1.encrypted.value
+            var dec = KJUR.crypto.Cipher.decrypt(b64tohex(enc), prv);
+            console.log("jsrsasign decrypt: " + dec);
+            document.form1.decrypted.value = dec;
+        }
+    </script>
+    <style type="text/css">
+        TD {
+            vertical-align: top
+        }
+    </style>
+</head>
+<body>
+<h1>Sample Application for RSA signing in JavaScript</h1>
+
+<form name="form1">
+    <table border="0">
+        <tr>
+            <th>Signer</th>
+            <th></th>
+            <th>Verifier</th>
+        </tr>
+
+        <tr>
+            <td>
+                PEM RSA Private Key<br/>
+                <!-- _test/z5.* for X.509v1 certificate and private key -->
+                <textarea name="prvkey1" rows="10" cols="65">
+-----BEGIN PRIVATE KEY-----
+MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEAqFfJiO+LQsoKI0Iq
+Xzy24KdXNrzUn3nG5D07y+Jfz5W3/AeNTigCSYvP8ZOrqwZ3guGcHGRaUwAoLDW8
+eEyBCQIDAQABAkBr82+PWl0pRTpfBcz6KYr0YRryRQDsC0FZl1LDGbVq/X1cCyaW
+ENs1/kQR/mBvuidWQygQjyfdO/+dUNv3lS1JAiEA/9OKj3hmy6jh4oZd1cs6upWo
+bXfI4Vv8Eead6eqM9ZcCIQCodQruWvElPMRT07NahXfNo5xvQDZmeyQGhgN2i6VS
+XwIgOH32Mwhbas24U9VoEzX1mg5CSyoQafNuDmXmqSjqR7ECIQCOTkmMr5CU92+W
+rPkPWD6rnjIxnRoXmqEFTcKxKyjemwIhAPFi9lV5bnePuLrDIJJd62uDevO2hmMJ
+E3U8YK1iCxJM
+-----END PRIVATE KEY-----
+                </textarea><br/>
+                Text message to be signed.<br/>
+                <input type="text" name="msgsigned" size="100" value="59abde7ae9404dca8e02a46c175be739"/><br/>
+            </td>
+            <td></td>
+            <td>
+                Verification Result
+                <div id="verifyresult" style="background: yellow">Please fill values below and push "Verify this
+                    sigunature" button.
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <select name="hashalg">
+                    <option value="sha1" selected>SHA1
+                    <option value="sha256">SHA256
+                    <option value="sha512">SHA512
+                    <option value="md5">MD5
+                    <option value="ripemd160">RIPEMD-160
+                </select>
+                <input type="button" value="签名 &darr;" onClick="doSign();"/><br/>
+            </td>
+            <td>
+                <input type="button" value="复制 &rarr;" onClick="copyMsgAndSig();"/><br/>
+            </td>
+            <td>
+                <input type="button" value="验证签名 &uarr;" onClick="doVerify();"/><br/>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                Generated Signature<br/>
+                <textarea name="siggenerated" rows="4" cols="65"></textarea>
+            </td>
+            <td>
+            </td>
+            <td>
+                Verifying Signature<br/>
+                <textarea name="sigverified" rows="4" cols="65">
+                </textarea><br/>
+                Text message to be verified.<br/>
+                <input type="text" name="msgverified" size="100" value="59abde7ae9404dca8e02a46c175be739"/><br/>
+                Signer's Public Key Certificate.<br/>
+                <textarea name="cert" rows="10" cols="65">
+-----BEGIN PUBLIC KEY-----
+MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKhXyYjvi0LKCiNCKl88tuCnVza81J95
+xuQ9O8viX8+Vt/wHjU4oAkmLz/GTq6sGd4LhnBxkWlMAKCw1vHhMgQkCAwEAAQ==
+-----END PUBLIC KEY-----
+                </textarea><br/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="button" value="加密 &darr;" onClick="doEncrypt();"/><br/>
+            </td>
+            <td>
+                <input type="button" value="解密 &uarr;" onClick="doDecrypt();"/><br/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                加密后<br/>
+                <textarea name="encrypted" rows="4" cols="65"></textarea>
+            </td>
+            <td>
+            </td>
+            <td><br/>
+                解密后<br/>
+                <input type="text" name="decrypted" size="100" value=""/><br/>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<h3>How to sign and verify a text message (simple usage)</h3>
+<ol>
+    <li>Modify the text message 'aaa' to anything you want.</li>
+    <li>Choose hash algorithm for signing 'SHA1' or 'SHA256'.</li>
+    <li>Push 'Sign to this message' button in the left.</li>
+    <li>Push 'Copy' button in the middle to copy the message to be signed and the generated signature value to
+        verification form in the right.
+    </li>
+    <li>Push 'Verify this message' in the right.</li>
+    <li>Then you can see signature verification result in the top of right.</li>
+</ol>
+<h3>Note for signing in the left form.</h3>
+See below when you want to specify message and private key to be signed.
+<ul>
+    <li>In the 'PEM RSA Private Key' text area, you can specify
+        signer's private key. The format of the key should be
+        PKCS#1 PEM text formatted and unencrypted RSA private key.
+    </li>
+</ul>
+
+<h3>Note for signature verification in the right form.</h3>
+See below when you want to specify message,
+signature value and public key certificate to be verified.
+<ul>
+    <li>In the 'Verifying Signature' field, you can specify
+        any signature value to be verified.
+        Signature value should be hexa decimal encoded 'RSASSA-PKCS1-v1_5' signature.
+        Currently this supports 'SHA1withRSA' and 'SHA256withRSA' signature algorihtm.
+        RSA key length have been tested from 512bit to 2048bit for this program.
+    </li>
+    <li>
+        In the "Signer's Public Key Certificate" field,
+        you can specify signer's public key certificate to be verified.
+        The value should be PEM encoded X.509 certificate with RSA public key.
+        X.509v1 and X.509v3 is available however X.509v2 is not supported now.
+    </li>
+</ul>
+</body>
+</html>
