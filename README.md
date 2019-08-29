@@ -1,2 +1,3 @@
 # jsEncrypt
-js加解密
+RSA加解密及签名
+DES加解密
