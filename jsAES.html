@@ -12,7 +12,7 @@
 		
 
         <script>
-             //AES 解密 加密
+             //AES 解密 加密  AES/ECB/PKCS7Padding 数据块128位
             function encryptByAES(message, key) {
                     var keyHex = CryptoJS.enc.Utf8.parse(key);
                     var encrypted = CryptoJS.AES.encrypt(message, keyHex, {
