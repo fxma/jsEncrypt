@@ -151,14 +151,17 @@ E3U8YK1iCxJM
 -----END PRIVATE KEY-----
                 </textarea><br/>
                 Text message to be signed.<br/>
-                <input type="text" name="msgsigned" size="100" value="59abde7ae9404dca8e02a46c175be739"/><br/>
+                <textarea name="msgsigned" rows="4" cols="65">59abde7ae9404dca8e02a46c175be739</textarea><br/>
             </td>
             <td></td>
             <td>
-                Verification Result
-                <div id="verifyresult" style="background: yellow">Please fill values below and push "Verify this
-                    sigunature" button.
-                </div>
+				Signer's Public Key Certificate.<br/>
+                <textarea name="cert" rows="10" cols="65">
+-----BEGIN PUBLIC KEY-----
+MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKhXyYjvi0LKCiNCKl88tuCnVza81J95
+xuQ9O8viX8+Vt/wHjU4oAkmLz/GTq6sGd4LhnBxkWlMAKCw1vHhMgQkCAwEAAQ==
+-----END PUBLIC KEY-----
+                </textarea><br/>
             </td>
         </tr>
 
@@ -193,22 +196,19 @@ E3U8YK1iCxJM
                 <textarea name="sigverified" rows="4" cols="65">
                 </textarea><br/>
                 Text message to be verified.<br/>
-                <input type="text" name="msgverified" size="100" value="59abde7ae9404dca8e02a46c175be739"/><br/>
-                Signer's Public Key Certificate.<br/>
-                <textarea name="cert" rows="10" cols="65">
------BEGIN PUBLIC KEY-----
-MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKhXyYjvi0LKCiNCKl88tuCnVza81J95
-xuQ9O8viX8+Vt/wHjU4oAkmLz/GTq6sGd4LhnBxkWlMAKCw1vHhMgQkCAwEAAQ==
------END PUBLIC KEY-----
-                </textarea><br/>
+				<textarea name="msgverified" rows="4" cols="65">59abde7ae9404dca8e02a46c175be739</textarea><br/>
+                Verification Result
+                <div id="verifyresult" style="background: yellow">Please fill values below and push "Verify this
+                    sigunature" button.
+                </div>
             </td>
         </tr>
         <tr>
             <td>
-                <input type="button" value="加密 &darr;" onClick="doEncrypt();"/><br/>
+                <input type="button" value="公钥加密 &darr;" onClick="doEncrypt();"/><br/>
             </td>
             <td>
-                <input type="button" value="解密 &uarr;" onClick="doDecrypt();"/><br/>
+                <input type="button" value="私钥解密 &uarr;" onClick="doDecrypt();"/><br/>
             </td>
         </tr>
         <tr>
@@ -218,9 +218,9 @@ xuQ9O8viX8+Vt/wHjU4oAkmLz/GTq6sGd4LhnBxkWlMAKCw1vHhMgQkCAwEAAQ==
             </td>
             <td>
             </td>
-            <td><br/>
+            <td>
                 解密后<br/>
-                <input type="text" name="decrypted" size="100" value=""/><br/>
+				<textarea name="decrypted" rows="4" cols="65"></textarea><br/>
             </td>
         </tr>
     </table>
